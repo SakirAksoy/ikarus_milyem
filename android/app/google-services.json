@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "361108049818",
+    "project_id": "ikarus-milyem-672ff",
+    "storage_bucket": "ikarus-milyem-672ff.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:361108049818:android:1d92db96d33b70c984f423",
+        "android_client_info": {
+          "package_name": "ikarus.ikarus_milyem"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAr-ZiVJHuX5h7iwARy5yvuBTyT4aOGPCk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
