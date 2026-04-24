@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'kur_page.dart';
 import 'islem_page.dart';
 import 'musteri_liste_page.dart';
 import 'stok_liste_page.dart';
+import 'dashboard_page.dart';
 
-enum AppPage { kur, islem, musteriler, stok, raporlar }
+enum AppPage { dashboard, kur, islem, musteriler, stok }
 
 // ============================================================================
 // MAIN LAYOUT - Application Shell with Navigation
@@ -21,7 +23,7 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  AppPage _currentPage = AppPage.kur;
+  AppPage _currentPage = AppPage.dashboard;
 
   // =========================================================================
   // PAGE TITLE MAPPING
@@ -29,6 +31,8 @@ class _MainLayoutState extends State<MainLayout> {
 
   String _getPageTitle(AppPage page) {
     switch (page) {
+      case AppPage.dashboard:
+        return 'IKARUS MİLYEM';
       case AppPage.kur:
         return 'Döviz Kurları';
       case AppPage.islem:
@@ -37,8 +41,6 @@ class _MainLayoutState extends State<MainLayout> {
         return 'Müşteri Yönetimi';
       case AppPage.stok:
         return 'Stok Yönetimi';
-      case AppPage.raporlar:
-        return 'Raporlar';
     }
   }
 
@@ -48,6 +50,8 @@ class _MainLayoutState extends State<MainLayout> {
 
   Widget _buildCurrentPage() {
     switch (_currentPage) {
+      case AppPage.dashboard:
+        return const DashboardPage();
       case AppPage.kur:
         return const KurPage();
       case AppPage.islem:
@@ -56,12 +60,6 @@ class _MainLayoutState extends State<MainLayout> {
         return const MusteriListePage();
       case AppPage.stok:
         return const StokListePage();
-      case AppPage.raporlar:
-        return const _PlaceholderPage(
-          title: 'Raporlar',
-          icon: Icons.bar_chart,
-          description: 'Raporlar sayfası (Faz 4 Aşama 3 de gelecek)',
-        );
     }
   }
 
@@ -73,8 +71,14 @@ class _MainLayoutState extends State<MainLayout> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_getPageTitle(_currentPage)),
-        elevation: 2,
+        title: Text(
+          _getPageTitle(_currentPage),
+          style: GoogleFonts.syne(
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        elevation: 0,
         centerTitle: true,
       ),
       body: _buildCurrentPage(),
@@ -88,77 +92,29 @@ class _MainLayoutState extends State<MainLayout> {
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.trending_up),
+            icon: const Icon(Icons.home_rounded),
+            label: 'Dashboard',
+            tooltip: 'Ana Sayfa',
+          ),
+          BottomNavigationBarItem(
+            icon: const Icon(Icons.trending_up_rounded),
             label: 'Kurlar',
             tooltip: 'Döviz Kurları',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.receipt_long),
+            icon: const Icon(Icons.receipt_long_rounded),
             label: 'İşlem',
             tooltip: 'İşlem Kaydı',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.people),
+            icon: const Icon(Icons.people_rounded),
             label: 'Müşteriler',
             tooltip: 'Müşteri Yönetimi',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.inventory_2),
+            icon: const Icon(Icons.inventory_2_rounded),
             label: 'Stok',
             tooltip: 'Stok Yönetimi',
-          ),
-          BottomNavigationBarItem(
-            icon: const Icon(Icons.bar_chart),
-            label: 'Raporlar',
-            tooltip: 'Raporlar',
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-// ============================================================================
-// PLACEHOLDER PAGE - For upcoming sections
-// ============================================================================
-
-class _PlaceholderPage extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final String description;
-
-  const _PlaceholderPage({
-    required this.title,
-    required this.icon,
-    required this.description,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            icon,
-            size: 64,
-            color: Colors.blue.shade300,
-          ),
-          const SizedBox(height: 24),
-          Text(
-            title,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 12),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Text(
-              description,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey.shade600,
-                  ),
-            ),
           ),
         ],
       ),

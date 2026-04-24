@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'stok_provider.dart';
 import 'stok_ekle_dialog.dart';
+import 'theme.dart';
 
 class StokListePage extends ConsumerStatefulWidget {
   const StokListePage({super.key});
@@ -37,11 +39,19 @@ class _StokListePageState extends ConsumerState<StokListePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.inventory_2_outlined, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.inventory_2_outlined,
+                    size: 64,
+                    color: AntiGravityColors.textMuted,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz ürün yok',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: GoogleFonts.syne(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AntiGravityColors.textLight,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
@@ -59,23 +69,28 @@ class _StokListePageState extends ConsumerState<StokListePage> {
             itemCount: stoklar.length,
             itemBuilder: (context, index) {
               final stok = stoklar[index];
-              final gramRengi = stok.toplamGram > 0
-                  ? Colors.blue.shade700
-                  : Colors.grey.shade700;
-              final adetRengi = stok.toplamAdet > 0
-                  ? Colors.green.shade700
-                  : Colors.grey.shade700;
+              final gramRengi =
+                  stok.toplamGram > 0 ? AntiGravityColors.goldAccent : AntiGravityColors.textMuted;
+              final adetRengi =
+                  stok.toplamAdet > 0 ? AntiGravityColors.liveGreen : AntiGravityColors.textMuted;
 
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 6.0),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Colors.amber.shade700,
-                    child: const Icon(Icons.diamond, color: Colors.white, size: 20),
+                    backgroundColor: AntiGravityColors.goldAccent,
+                    child: const Icon(
+                      Icons.diamond,
+                      color: AntiGravityColors.darkBg,
+                      size: 20,
+                    ),
                   ),
                   title: Text(
                     '${stok.urunAdi} (${stok.urunKodu})',
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.bold,
+                      color: AntiGravityColors.textLight,
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -83,12 +98,18 @@ class _StokListePageState extends ConsumerState<StokListePage> {
                       const SizedBox(height: 4),
                       Text(
                         '🏷️ ${stok.urunGrubu} • 💎 ${stok.milyem.toStringAsFixed(0)} Milyem',
-                        style: const TextStyle(fontSize: 12),
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 12,
+                          color: AntiGravityColors.textMuted,
+                        ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         '⚖️ ${stok.toplamGram.toStringAsFixed(2)} gr | 📦 ${stok.toplamAdet} Adet',
-                        style: const TextStyle(fontSize: 12, color: Colors.grey),
+                        style: GoogleFonts.jetBrainsMono(
+                          fontSize: 12,
+                          color: AntiGravityColors.textMuted,
+                        ),
                       ),
                     ],
                   ),
@@ -103,7 +124,7 @@ class _StokListePageState extends ConsumerState<StokListePage> {
                           children: [
                             Text(
                               '${stok.toplamGram.toStringAsFixed(2)} gr',
-                              style: TextStyle(
+                              style: GoogleFonts.jetBrainsMono(
                                 fontWeight: FontWeight.bold,
                                 color: gramRengi,
                                 fontSize: 12,
@@ -112,7 +133,7 @@ class _StokListePageState extends ConsumerState<StokListePage> {
                             const SizedBox(height: 2),
                             Text(
                               '${stok.toplamAdet} Adet',
-                              style: TextStyle(
+                              style: GoogleFonts.jetBrainsMono(
                                 fontSize: 10,
                                 color: adetRengi,
                               ),
@@ -120,7 +141,7 @@ class _StokListePageState extends ConsumerState<StokListePage> {
                           ],
                         ),
                         IconButton(
-                          icon: const Icon(Icons.delete_sweep_outlined, color: Colors.red),
+                          icon: const Icon(Icons.delete_sweep_outlined, color: Color(0xFFFF6B6B)),
                           onPressed: () => _showDeleteConfirmation(stok.id),
                           tooltip: 'Ürünü Sil',
                           constraints: const BoxConstraints(minWidth: 0, minHeight: 0),

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'musteri_provider.dart';
 import 'musteri_ekle_dialog.dart';
+import 'theme.dart';
 
 class MusteriListePage extends ConsumerStatefulWidget {
   const MusteriListePage({super.key});
@@ -37,11 +39,19 @@ class _MusteriListePageState extends ConsumerState<MusteriListePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.people_outline, size: 64, color: Colors.grey.shade400),
+                  Icon(
+                    Icons.people_outline,
+                    size: 64,
+                    color: AntiGravityColors.textMuted,
+                  ),
                   const SizedBox(height: 16),
                   Text(
                     'Henüz müşteri yok',
-                    style: Theme.of(context).textTheme.titleLarge,
+                    style: GoogleFonts.syne(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: AntiGravityColors.textLight,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   ElevatedButton.icon(
@@ -60,10 +70,10 @@ class _MusteriListePageState extends ConsumerState<MusteriListePage> {
             itemBuilder: (context, index) {
               final musteri = musteriler[index];
               final Color bakiyeRengi = musteri.isBorcu
-                  ? Colors.red.shade700
+                  ? Color(0xFFFF6B6B)
                   : musteri.isAlacakli
-                      ? Colors.green.shade700
-                      : Colors.grey.shade700;
+                      ? AntiGravityColors.liveGreen
+                      : AntiGravityColors.textMuted;
 
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 6.0),
@@ -72,28 +82,53 @@ class _MusteriListePageState extends ConsumerState<MusteriListePage> {
                     backgroundColor: bakiyeRengi,
                     child: Text(
                       musteri.adSoyad.isNotEmpty ? musteri.adSoyad[0].toUpperCase() : '?',
-                      style: const TextStyle(color: Colors.white),
+                      style: GoogleFonts.syne(
+                        color: AntiGravityColors.darkBg,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                   title: Text(
                     musteri.firmaAdi.isNotEmpty
-                      ? '${musteri.adSoyad} (${musteri.firmaAdi})'
-                      : musteri.adSoyad,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                        ? '${musteri.adSoyad} (${musteri.firmaAdi})'
+                        : musteri.adSoyad,
+                    style: GoogleFonts.syne(
+                      fontWeight: FontWeight.bold,
+                      color: AntiGravityColors.textLight,
+                    ),
                   ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       if (musteri.firmaAdi.isNotEmpty)
-                        Text('🏢 ${musteri.firmaAdi}', style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500)),
+                        Text(
+                          '🏢 ${musteri.firmaAdi}',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AntiGravityColors.textMuted,
+                          ),
+                        ),
                       if (musteri.firmaAdi.isNotEmpty)
                         const SizedBox(height: 2),
                       if (musteri.telefon != null && musteri.telefon!.isNotEmpty)
-                        Text('☎️ ${musteri.telefon}', style: const TextStyle(fontSize: 12)),
+                        Text(
+                          '☎️ ${musteri.telefon}',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 12,
+                            color: AntiGravityColors.textMuted,
+                          ),
+                        ),
                       if (musteri.telefon != null && musteri.telefon!.isNotEmpty)
                         const SizedBox(height: 2),
                       if (musteri.adres != null && musteri.adres!.isNotEmpty)
-                        Text('📍 ${musteri.adres}', style: const TextStyle(fontSize: 12)),
+                        Text(
+                          '📍 ${musteri.adres}',
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 12,
+                            color: AntiGravityColors.textMuted,
+                          ),
+                        ),
                     ],
                   ),
                   trailing: Column(
@@ -102,7 +137,7 @@ class _MusteriListePageState extends ConsumerState<MusteriListePage> {
                     children: [
                       Text(
                         '${musteri.toplamHasBakiye.toStringAsFixed(4)} gr',
-                        style: TextStyle(
+                        style: GoogleFonts.jetBrainsMono(
                           fontWeight: FontWeight.bold,
                           color: bakiyeRengi,
                           fontSize: 14,
@@ -115,7 +150,11 @@ class _MusteriListePageState extends ConsumerState<MusteriListePage> {
                             : musteri.isAlacakli
                                 ? 'Alacaklı'
                                 : 'Alacaksız',
-                        style: TextStyle(fontSize: 11, color: bakiyeRengi),
+                        style: GoogleFonts.syne(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: bakiyeRengi,
+                        ),
                       ),
                     ],
                   ),

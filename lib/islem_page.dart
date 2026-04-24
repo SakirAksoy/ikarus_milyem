@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'kuyumcu_islem_model.dart';
 import 'kuyumcu_islem_provider.dart';
 import 'musteri_provider.dart';
@@ -9,6 +10,7 @@ import 'musteri_model.dart';
 import 'calculator_providers.dart';
 import 'stok_provider.dart';
 import 'stok_model.dart';
+import 'theme.dart';
 
 class IslemPage extends ConsumerStatefulWidget {
   const IslemPage({super.key});
@@ -150,7 +152,7 @@ class _IslemPageState extends ConsumerState<IslemPage> {
                           value: s.id,
                           child: Text('${s.urunAdi} (${s.toplamGram.toStringAsFixed(2)} gr)'),
                         ))
-                    .toList(),
+                    ,
               ],
               onChanged: (value) {
                 setState(() {
@@ -418,56 +420,91 @@ class _IslemPageState extends ConsumerState<IslemPage> {
     final kur = ref.watch(exchangeRatesProvider);
     final tlDegeri = _hasAltinKarsiligi * (kur?.gramHasGoldToTL ?? 250.0);
 
-    return Card(
-      elevation: 3,
-      color: Colors.amber.shade50,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text('Has Altın Karşılığı', style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('Gramaj', style: Theme.of(context).textTheme.bodySmall),
-                    Text(
-                      '${_hasAltinKarsiligi.toStringAsFixed(4)} gr',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber.shade900,
-                          ),
-                    ),
-                  ],
-                ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Text('TL Değeri', style: Theme.of(context).textTheme.bodySmall),
-                    Text(
-                      '${tlDegeri.toStringAsFixed(2)} TL',
-                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.green.shade900,
-                          ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AntiGravityColors.gold1.withValues(alpha: 0.3),
+            AntiGravityColors.gold2.withValues(alpha: 0.2),
           ],
         ),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: AntiGravityColors.goldAccent.withValues(alpha: 0.4),
+          width: 1.5,
+        ),
+      ),
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'HAS ALTIN KARŞILIĞI',
+            style: GoogleFonts.syne(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AntiGravityColors.textMuted,
+              letterSpacing: 1,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Gramaj',
+                    style: GoogleFonts.syne(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AntiGravityColors.textMuted,
+                    ),
+                  ),
+                  Text(
+                    '${_hasAltinKarsiligi.toStringAsFixed(4)} gr',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AntiGravityColors.goldAccent,
+                    ),
+                  ),
+                ],
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  Text(
+                    'TL Değeri',
+                    style: GoogleFonts.syne(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: AntiGravityColors.textMuted,
+                    ),
+                  ),
+                  Text(
+                    '${tlDegeri.toStringAsFixed(2)} TL',
+                    style: GoogleFonts.jetBrainsMono(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AntiGravityColors.liveGreen,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
   Future<void> _saveTransaction() async {
     if (_selectedMusteriId == null) {
-      _showSnackBar('Lütfen müşteri seçin', Colors.orange);
+      _showSnackBar('Lütfen müşteri seçin', AntiGravityColors.goldAccent);
       return;
     }
 
@@ -500,13 +537,13 @@ class _IslemPageState extends ConsumerState<IslemPage> {
       if (mounted) {
         _showSnackBar(
           '✓ İşlem kaydedildi (${_hasAltinKarsiligi.toStringAsFixed(4)} gr Has)',
-          Colors.green,
+          AntiGravityColors.liveGreen,
         );
         _resetForm();
       }
     } catch (e) {
       if (mounted) {
-        _showSnackBar('✗ Hata: $e', Colors.red);
+        _showSnackBar('✗ Hata: $e', Color(0xFFFF6B6B));
       }
     } finally {
       if (mounted) {
@@ -565,24 +602,28 @@ class _IslemPageState extends ConsumerState<IslemPage> {
               children: [
                 Card(
                   elevation: 2,
-                  color: Colors.blue.shade50,
+                  color: AntiGravityColors.gold2.withValues(alpha: 0.3),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       children: [
-                        Icon(Icons.business, size: 32, color: Colors.blue.shade700),
+                        Icon(Icons.business, size: 32, color: AntiGravityColors.goldAccent),
                         const SizedBox(height: 8),
                         Text(
                           'KUYUMCU CARİ İŞLEMLERİ',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.blue.shade900,
-                              ),
+                          style: GoogleFonts.syne(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AntiGravityColors.goldAccent,
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Text(
                           'Has Altın Gramı Üzerinden Yönetim',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.blue.shade700),
+                          style: GoogleFonts.jetBrainsMono(
+                            fontSize: 12,
+                            color: AntiGravityColors.textMuted,
+                          ),
                         ),
                       ],
                     ),
@@ -593,7 +634,7 @@ class _IslemPageState extends ConsumerState<IslemPage> {
                 const SizedBox(height: 16),
                 stoklarAsync.when(
                   loading: () => const SizedBox(height: 100, child: Center(child: CircularProgressIndicator())),
-                  error: (_, __) => const SizedBox.shrink(),
+                  error: (_, _) => const SizedBox.shrink(),
                   data: (stoklar) => Column(
                     children: [
                       _buildStokSelector(stoklar),
@@ -626,24 +667,27 @@ class _IslemPageState extends ConsumerState<IslemPage> {
                     label: Text(_isLoading ? 'KAYDEDILIYOR...' : 'İŞLEMİ KAYDET'),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AntiGravityColors.liveGreen,
+                      foregroundColor: AntiGravityColors.darkBg,
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
                 Card(
-                  color: Colors.blue.shade50,
+                  color: AntiGravityColors.goldAccent.withValues(alpha: 0.1),
                   child: Padding(
                     padding: const EdgeInsets.all(12.0),
                     child: Row(
                       children: [
-                        Icon(Icons.info, color: Colors.blue.shade700),
+                        Icon(Icons.info, color: AntiGravityColors.goldAccent),
                         const SizedBox(width: 12),
                         Expanded(
                           child: Text(
                             'Tüm işlemler Has Altın Gramı üzerinden hesaplanır.',
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.blue.shade900),
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodySmall
+                                ?.copyWith(color: AntiGravityColors.textLight),
                           ),
                         ),
                       ],

@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'firebase_seeder.dart';
 import 'main_layout.dart';
+import 'theme.dart';
 
 // ============================================================================
 // APPLICATION ENTRY POINT
@@ -45,10 +46,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'İkarus Milyem',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
+      theme: antiGravityTheme(),
       home: const MainLayout(),
       debugShowCheckedModeBanner: false,
     );

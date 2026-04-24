@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'kuyumcu_islem_model.dart';
+import 'fis_model.dart';
 
 // ============================================================================
 // KUYUMCU İŞLEM PROVIDER - Riverpod Servisi (FAZ 4 PROFESYONELİ)
@@ -138,6 +139,32 @@ class KuyumcuIslemService {
       // 3. BATCH UYGULA
       await batch.commit();
 
+      // 4. OTOMATİK FİŞ OLUŞTUR (Satış/Alış işlemleri için)
+      if (islem.islemTipi == IslemTipi.satis || islem.islemTipi == IslemTipi.alis) {
+        try {
+          final fisNo = DateTime.now().millisecondsSinceEpoch.toString();
+          final ayarStr = _getAyarString(islem);
+
+          await _firestore.collection('fisler').add({
+            'fisNo': fisNo,
+            'musteriAd': islem.musteriAdi,
+            'musteriTelefon': islem.musteriTelefon ?? '',
+            'tarih': DateTime.now().toIso8601String(),
+            'islemTipi': islem.islemTipi == IslemTipi.satis ? 'satis' : 'alis',
+            'ayar': ayarStr,
+            'hasGram': islem.hasAltinKarsiligi,
+            'tlTutar': islem.odemeMiktari ?? 0.0,
+            'odemeTipi': islem.odemeTuru ?? 'Nakit',
+            'notlar': null,
+          });
+
+          debugPrint('✓ Otomatik Fiş Oluşturuldu: $fisNo');
+        } catch (e) {
+          debugPrint('⚠️ Fiş Oluşturma Hatası (İşlem kaydı başarılı): $e');
+          // İşlem kaydı başarılı, fiş hatası non-critical
+        }
+      }
+
       debugPrint('✓ Kuyumcu İşlem Kaydedildi:');
       debugPrint('  - İşlem ID: ${islemRef.id}');
       debugPrint('  - Müşteri: ${islem.musteriAdi}');
@@ -148,6 +175,18 @@ class KuyumcuIslemService {
       debugPrint('✗ İşlem Kaydı Hatası: $e');
       rethrow;
     }
+  }
+
+  String _getAyarString(KuyumcuIslemModel islem) {
+    if (islem.urunMilyemi != null) {
+      final milyem = islem.urunMilyemi!;
+      if (milyem >= 995) return '1000';
+      if (milyem >= 916) return '916';
+      if (milyem >= 875) return '875';
+      if (milyem >= 750) return '750';
+      return '$milyem';
+    }
+    return 'Bilinmiyor';
   }
 
   /// İşlem tipine göre cari hesaba yazılacak Has değişimini hesapla
