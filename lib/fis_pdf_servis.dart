@@ -1,16 +1,20 @@
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:typed_data';
+
 import 'fis_model.dart';
-import 'theme.dart';
 
 class FisPdfServis {
-  static Future<Uint8List> generateFisPdf(FisModel fis) async {
+  static Future<Uint8List> generateFisPdf(FisModel fis, {String? firmaAdi, String? fisNotu}) async {
     final pdf = pw.Document();
+
+    final prefs = await SharedPreferences.getInstance();
+    final finalFirmaAdi = firmaAdi ?? prefs.getString('firma_adi') ?? 'ANTIGRAVITY KUYUMCULUK';
+    final finalFisNotu = fisNotu ?? prefs.getString('fis_notu') ?? 'Bizi tercih ettiğiniz için teşekkür ederiz.';
 
     final formatter = DateFormat('dd.MM.yyyy HH:mm');
     final tarihStr = formatter.format(fis.tarih);
@@ -25,7 +29,7 @@ class FisPdfServis {
             children: [
               // Firma Adı
               pw.Text(
-                'IKARUS MİLYEM',
+                finalFirmaAdi,
                 style: pw.TextStyle(
                   fontSize: 14,
                   fontWeight: pw.FontWeight.bold,
@@ -40,9 +44,9 @@ class FisPdfServis {
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
                   pw.Text('Fiş No: ${fis.fisNo}',
-                      style: const pw.TextStyle(fontSize: 10)),
+                      style: pw.TextStyle(fontSize: 10)),
                   pw.Text(tarihStr,
-                      style: const pw.TextStyle(fontSize: 10)),
+                      style: pw.TextStyle(fontSize: 10)),
                 ],
               ),
               pw.SizedBox(height: 2),
@@ -50,7 +54,7 @@ class FisPdfServis {
               // İşlem Tipi
               pw.Text(
                 'İşlem: ${_getIslemTipiStr(fis.islemTipi)} (${fis.ayar})',
-                style: const pw.TextStyle(fontSize: 10),
+                style: pw.TextStyle(fontSize: 10),
               ),
               pw.SizedBox(height: 8),
               pw.Divider(height: 1),
@@ -58,9 +62,9 @@ class FisPdfServis {
 
               // Müşteri Bilgisi
               pw.Text('Müşteri: ${fis.musteriAd}',
-                  style: const pw.TextStyle(fontSize: 10)),
+                  style: pw.TextStyle(fontSize: 10)),
               pw.Text('Tel: ${fis.musteriTelefon}',
-                  style: const pw.TextStyle(fontSize: 9)),
+                  style: pw.TextStyle(fontSize: 9)),
               pw.SizedBox(height: 8),
 
               // Detaylar
@@ -70,20 +74,20 @@ class FisPdfServis {
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.start,
                     children: [
-                      pw.Text('Has Gram:', style: const pw.TextStyle(fontSize: 9)),
-                      pw.Text('Tutar (TL):', style: const pw.TextStyle(fontSize: 9)),
-                      pw.Text('Ödeme:', style: const pw.TextStyle(fontSize: 9)),
+                      pw.Text('Has Gram:', style: pw.TextStyle(fontSize: 9)),
+                      pw.Text('Tutar (TL):', style: pw.TextStyle(fontSize: 9)),
+                      pw.Text('Ödeme:', style: pw.TextStyle(fontSize: 9)),
                     ],
                   ),
                   pw.Column(
                     crossAxisAlignment: pw.CrossAxisAlignment.end,
                     children: [
-                      pw.Text('${fis.hasGram.toStringAsFixed(4)}',
-                          style: const pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
-                      pw.Text('${fis.tlTutar.toStringAsFixed(2)}',
-                          style: const pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                      pw.Text(fis.hasGram.toStringAsFixed(4),
+                          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
+                      pw.Text(fis.tlTutar.toStringAsFixed(2),
+                          style: pw.TextStyle(fontSize: 10, fontWeight: pw.FontWeight.bold)),
                       pw.Text(fis.odemeTipi,
-                          style: const pw.TextStyle(fontSize: 9)),
+                          style: pw.TextStyle(fontSize: 9)),
                     ],
                   ),
                 ],
@@ -94,8 +98,9 @@ class FisPdfServis {
 
               // Not
               pw.Text(
-                'Mali değeri yoktur.',
-                style: const pw.TextStyle(fontSize: 8),
+                finalFisNotu,
+                textAlign: pw.TextAlign.center,
+                style: pw.TextStyle(fontSize: 8),
               ),
             ],
           );
@@ -117,8 +122,11 @@ class FisPdfServis {
     }
   }
 
-  static Future<void> shareFisWhatsApp(FisModel fis) async {
+  static Future<void> shareFisWhatsApp(FisModel fis, {String? firmaAdi}) async {
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final finalFirmaAdi = firmaAdi ?? prefs.getString('firma_adi') ?? 'ANTIGRAVITY KUYUMCULUK';
+
       final formatter = DateFormat('dd.MM.yyyy HH:mm');
       final tarihStr = formatter.format(fis.tarih);
 
@@ -134,7 +142,7 @@ $tarihStr tarihli işleminizin detayı:
 
 *Mali değeri yoktur.*
 
-IKARUS MİLYEM
+$finalFirmaAdi
 ''';
 
       // WhatsApp URL şeması

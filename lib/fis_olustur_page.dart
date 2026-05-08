@@ -5,7 +5,6 @@ import 'theme.dart';
 import 'fis_model.dart';
 import 'fis_provider.dart';
 import 'musteri_provider.dart';
-import 'musteri_model.dart';
 
 class FisOlusturPage extends ConsumerStatefulWidget {
   const FisOlusturPage({super.key});
@@ -19,7 +18,7 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
   String? _selectedMusteriAd;
   String? _selectedMusteriTelefon;
   IslemTipiFis _selectedIslemTipi = IslemTipiFis.manuel;
-  String _selectedAyar = '916';
+  int _selectedMilyem = 916;
   String _selectedOdemeTipi = 'Nakit';
 
   final _hasGramController = TextEditingController();
@@ -28,17 +27,24 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
 
   bool _isLoading = false;
 
+  static const List<Map<String, dynamic>> milyemAyarlari = [
+    {'ad': '8 Ayar', 'milyem': 333},
+    {'ad': '9 Ayar', 'milyem': 375},
+    {'ad': '10 Ayar', 'milyem': 417},
+    {'ad': '14 Ayar', 'milyem': 585},
+    {'ad': '18 Ayar', 'milyem': 750},
+    {'ad': '19 Ayar', 'milyem': 800},
+    {'ad': '21 Ayar', 'milyem': 875},
+    {'ad': '22 Ayar', 'milyem': 916},
+    {'ad': '24 Ayar', 'milyem': 1000},
+  ];
+
   @override
   void dispose() {
     _hasGramController.dispose();
     _tlTutarController.dispose();
     _notlarController.dispose();
     super.dispose();
-  }
-
-  void _generateFisNo() {
-    final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    return;
   }
 
   Future<void> _saveFis() async {
@@ -63,7 +69,7 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
             musteriTelefon: _selectedMusteriTelefon ?? '',
             tarih: DateTime.now(),
             islemTipi: _selectedIslemTipi,
-            ayar: _selectedAyar,
+            ayar: (_selectedMilyem / 1000).toStringAsFixed(3),
             hasGram: double.tryParse(_hasGramController.text) ?? 0.0,
             tlTutar: double.tryParse(_tlTutarController.text) ?? 0.0,
             odemeTipi: _selectedOdemeTipi,
@@ -77,8 +83,9 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
       if (!context.mounted) return;
       _showSnackBar('✗ Hata: $e', const Color(0xFFFF6B6B));
     } finally {
-      if (!context.mounted) return;
-      setState(() => _isLoading = false);
+      if (context.mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
 
@@ -90,7 +97,7 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
       _selectedMusteriId = null;
       _selectedMusteriAd = null;
       _selectedIslemTipi = IslemTipiFis.manuel;
-      _selectedAyar = '916';
+      _selectedMilyem = 916;
       _selectedOdemeTipi = 'Nakit';
     });
   }
@@ -228,7 +235,7 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
                   ),
                 ),
 
-                // Ayar
+                // Altın Ayarı (Milyem)
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(12),
@@ -244,18 +251,42 @@ class _FisOlusturPageState extends ConsumerState<FisOlusturPage> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        DropdownButtonFormField<String>(
-                          initialValue: _selectedAyar,
-                          items: [
-                            DropdownMenuItem(value: '1000', child: const Text('1000 - Has Altın')),
-                            DropdownMenuItem(value: '995', child: const Text('995 - 24 Ayar')),
-                            DropdownMenuItem(value: '916', child: const Text('916 - 22 Ayar')),
-                            DropdownMenuItem(value: '875', child: const Text('875 - 21 Ayar')),
-                            DropdownMenuItem(value: '750', child: const Text('750 - 18 Ayar')),
-                          ].toList(),
-                          onChanged: (value) => setState(() => _selectedAyar = value ?? '916'),
+                        DropdownButtonFormField<int>(
+                          initialValue: _selectedMilyem,
+                          items: milyemAyarlari
+                              .map((ayar) => DropdownMenuItem<int>(
+                                    value: ayar['milyem'] as int,
+                                    child: Text(
+                                      '${ayar['ad']} (${ayar['milyem']} Milyem)',
+                                      style: GoogleFonts.jetBrainsMono(fontSize: 13),
+                                    ),
+                                  ))
+                              .toList(),
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _selectedMilyem = value);
+                            }
+                          },
                           decoration: InputDecoration(
-                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(color: AntiGravityColors.border),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: AntiGravityColors.border,
+                                width: 1,
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                              borderSide: const BorderSide(
+                                color: AntiGravityColors.goldAccent,
+                                width: 2,
+                              ),
+                            ),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                           ),
                         ),
                       ],

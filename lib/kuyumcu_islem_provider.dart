@@ -1,8 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'kuyumcu_islem_model.dart';
-import 'fis_model.dart';
+
 
 // ============================================================================
 // KUYUMCU İŞLEM PROVIDER - Riverpod Servisi (FAZ 4 PROFESYONELİ)
@@ -148,7 +149,7 @@ class KuyumcuIslemService {
           await _firestore.collection('fisler').add({
             'fisNo': fisNo,
             'musteriAd': islem.musteriAdi,
-            'musteriTelefon': islem.musteriTelefon ?? '',
+            'musteriTelefon': '',
             'tarih': DateTime.now().toIso8601String(),
             'islemTipi': islem.islemTipi == IslemTipi.satis ? 'satis' : 'alis',
             'ayar': ayarStr,

@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'kur_page.dart';
-import 'islem_page.dart';
-import 'musteri_liste_page.dart';
-import 'stok_liste_page.dart';
+import 'theme.dart';
 import 'dashboard_page.dart';
-
-enum AppPage { dashboard, kur, islem, musteriler, stok }
+import 'islem_page.dart';
+import 'fis_gecmisi_page.dart';
+import 'ayarlar_page.dart';
+import 'musteri_liste_page.dart';
+import 'envanter_hub_page.dart';
 
 // ============================================================================
 // MAIN LAYOUT - Application Shell with Navigation
 // ============================================================================
 //
 // Provides the main scaffold with bottom navigation bar
-// Pages: Kur (Exchange Rates), İşlem (Transactions), Stok (Inventory), Raporlar (Reports)
+// Pages: Dashboard, İşlem, Stok, Fişler, Ayarlar
 
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
@@ -23,98 +23,88 @@ class MainLayout extends StatefulWidget {
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  AppPage _currentPage = AppPage.dashboard;
+  int _currentIndex = 0;
 
-  // =========================================================================
-  // PAGE TITLE MAPPING
-  // =========================================================================
+  final List<Widget> _pages = const [
+    DashboardPage(),
+    IslemPage(),
+    EnvanterHubPage(),
+    FisGecmisiPage(),
+    MusteriListePage(),
+    AyarlarPage(),
+  ];
 
-  String _getPageTitle(AppPage page) {
-    switch (page) {
-      case AppPage.dashboard:
+  String _getPageTitle(int index) {
+    switch (index) {
+      case 0:
         return 'IKARUS MİLYEM';
-      case AppPage.kur:
-        return 'Döviz Kurları';
-      case AppPage.islem:
-        return 'İşlem Kaydı';
-      case AppPage.musteriler:
-        return 'Müşteri Yönetimi';
-      case AppPage.stok:
-        return 'Stok Yönetimi';
+      case 1:
+        return 'İŞLEMLER';
+      case 2:
+        return 'KASA & STOK';
+      case 3:
+        return 'FİŞ GEÇMİŞİ';
+      case 4:
+        return 'MÜŞTERİLER';
+      case 5:
+        return 'AYARLAR';
+      default:
+        return 'IKARUS MİLYEM';
     }
   }
-
-  // =========================================================================
-  // PAGE BUILDER
-  // =========================================================================
-
-  Widget _buildCurrentPage() {
-    switch (_currentPage) {
-      case AppPage.dashboard:
-        return const DashboardPage();
-      case AppPage.kur:
-        return const KurPage();
-      case AppPage.islem:
-        return const IslemPage();
-      case AppPage.musteriler:
-        return const MusteriListePage();
-      case AppPage.stok:
-        return const StokListePage();
-    }
-  }
-
-  // =========================================================================
-  // BUILD
-  // =========================================================================
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _getPageTitle(_currentPage),
+          _getPageTitle(_currentIndex),
           style: GoogleFonts.syne(
             fontWeight: FontWeight.bold,
             fontSize: 20,
           ),
         ),
+        backgroundColor: AntiGravityColors.surface,
         elevation: 0,
         centerTitle: true,
       ),
-      body: _buildCurrentPage(),
+      body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentPage.index,
+        currentIndex: _currentIndex,
         onTap: (index) {
           setState(() {
-            _currentPage = AppPage.values[index];
+            _currentIndex = index;
           });
         },
         type: BottomNavigationBarType.fixed,
-        items: [
+        backgroundColor: AntiGravityColors.surface,
+        selectedItemColor: AntiGravityColors.goldAccent,
+        unselectedItemColor: AntiGravityColors.textMuted,
+        elevation: 8,
+        items: const [
           BottomNavigationBarItem(
-            icon: const Icon(Icons.home_rounded),
+            icon: Icon(Icons.dashboard),
             label: 'Dashboard',
-            tooltip: 'Ana Sayfa',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.trending_up_rounded),
-            label: 'Kurlar',
-            tooltip: 'Döviz Kurları',
+            icon: Icon(Icons.add_shopping_cart),
+            label: 'İşlemler',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.receipt_long_rounded),
-            label: 'İşlem',
-            tooltip: 'İşlem Kaydı',
+            icon: Icon(Icons.account_balance_wallet),
+            label: 'Kasa & Stok',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.people_rounded),
+            icon: Icon(Icons.receipt_long),
+            label: 'Fişler',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.people),
             label: 'Müşteriler',
-            tooltip: 'Müşteri Yönetimi',
           ),
           BottomNavigationBarItem(
-            icon: const Icon(Icons.inventory_2_rounded),
-            label: 'Stok',
-            tooltip: 'Stok Yönetimi',
+            icon: Icon(Icons.settings),
+            label: 'Ayarlar',
           ),
         ],
       ),

@@ -10,6 +10,7 @@ import 'musteri_model.dart';
 import 'calculator_providers.dart';
 import 'stok_provider.dart';
 import 'stok_model.dart';
+import 'kasa_provider.dart';
 import 'theme.dart';
 
 class IslemPage extends ConsumerStatefulWidget {
@@ -26,22 +27,34 @@ class _IslemPageState extends ConsumerState<IslemPage> {
   IslemTipi _selectedIslemTipi = IslemTipi.satis;
   UrunTipi _selectedUrunTipi = UrunTipi.gramajli;
   HurdaTipi _selectedHurdaTipi = HurdaTipi.ayar22;
+  int _selectedMilyem = 916;
 
-  final _urunMilyemiController = TextEditingController();
   final _iscilikMilyemiController = TextEditingController();
   final _parcaIscilikGramiController = TextEditingController();
   final _gramController = TextEditingController();
   final _adetController = TextEditingController();
   final _nakitMiktariController = TextEditingController();
   final _odemeTuruController = TextEditingController(text: 'TL');
+  final _islemTutariController = TextEditingController();
 
   double _hasAltinKarsiligi = 0.0;
   bool _isLoading = false;
 
+  static const List<Map<String, dynamic>> milyemAyarlari = [
+    {'ad': '8 Ayar', 'milyem': 333},
+    {'ad': '9 Ayar', 'milyem': 375},
+    {'ad': '10 Ayar', 'milyem': 417},
+    {'ad': '14 Ayar', 'milyem': 585},
+    {'ad': '18 Ayar', 'milyem': 750},
+    {'ad': '19 Ayar', 'milyem': 800},
+    {'ad': '21 Ayar', 'milyem': 875},
+    {'ad': '22 Ayar', 'milyem': 916},
+    {'ad': '24 Ayar', 'milyem': 1000},
+  ];
+
   @override
   void initState() {
     super.initState();
-    _urunMilyemiController.addListener(_recalculateHasAltin);
     _iscilikMilyemiController.addListener(_recalculateHasAltin);
     _parcaIscilikGramiController.addListener(_recalculateHasAltin);
     _gramController.addListener(_recalculateHasAltin);
@@ -51,13 +64,13 @@ class _IslemPageState extends ConsumerState<IslemPage> {
 
   @override
   void dispose() {
-    _urunMilyemiController.dispose();
     _iscilikMilyemiController.dispose();
     _parcaIscilikGramiController.dispose();
     _gramController.dispose();
     _adetController.dispose();
     _nakitMiktariController.dispose();
     _odemeTuruController.dispose();
+    _islemTutariController.dispose();
     super.dispose();
   }
 
@@ -68,13 +81,12 @@ class _IslemPageState extends ConsumerState<IslemPage> {
     try {
       switch (_selectedUrunTipi) {
         case UrunTipi.gramajli:
-          final milyem = int.tryParse(_urunMilyemiController.text) ?? 0;
           final iscilik = double.tryParse(_iscilikMilyemiController.text) ?? 0.0;
           final gram = double.tryParse(_gramController.text) ?? 0.0;
 
-          if (milyem > 0 && gram > 0) {
+          if (_selectedMilyem > 0 && gram > 0) {
             result = service.hesaplaGramajliUrunHasAltin(
-              urunMilyemi: milyem,
+              urunMilyemi: _selectedMilyem,
               iscilikMilyemi: iscilik,
               gram: gram,
             );
@@ -82,14 +94,13 @@ class _IslemPageState extends ConsumerState<IslemPage> {
           break;
 
         case UrunTipi.adetli:
-          final milyem = int.tryParse(_urunMilyemiController.text) ?? 0;
           final gram = double.tryParse(_gramController.text) ?? 0.0;
           final adet = int.tryParse(_adetController.text) ?? 0;
           final parcaIscilik = double.tryParse(_parcaIscilikGramiController.text) ?? 0.0;
 
-          if (milyem > 0 && gram > 0 && adet > 0) {
+          if (_selectedMilyem > 0 && gram > 0 && adet > 0) {
             result = service.hesaplaAdetliUrunHasAltin(
-              urunMilyemi: milyem,
+              urunMilyemi: _selectedMilyem,
               gram: gram,
               adet: adet,
               parcaIscilikGrami: parcaIscilik,
@@ -159,11 +170,9 @@ class _IslemPageState extends ConsumerState<IslemPage> {
                   _selectedStokId = value;
                   if (value != null) {
                     final stok = stoklar.firstWhere((s) => s.id == value);
-                    _urunMilyemiController.text = stok.milyem.toStringAsFixed(0);
+                    _selectedMilyem = stok.milyem.toInt();
                     _gramController.text = stok.toplamGram.toStringAsFixed(2);
                     _recalculateHasAltin();
-                  } else {
-                    _urunMilyemiController.clear();
                   }
                 });
               },
@@ -302,14 +311,14 @@ class _IslemPageState extends ConsumerState<IslemPage> {
     return Column(
       children: [
         if (_selectedUrunTipi == UrunTipi.gramajli) ...[
-          _buildTextField(label: 'Ürün Milyemi', hint: '916, 750, 585 vb.', controller: _urunMilyemiController),
+          _buildMilyemDropdown(),
           const SizedBox(height: 12),
           _buildTextField(label: 'İşçilik Milyemi', hint: '50', controller: _iscilikMilyemiController),
           const SizedBox(height: 12),
           _buildTextField(label: 'Gram', hint: '10.50', controller: _gramController),
         ],
         if (_selectedUrunTipi == UrunTipi.adetli) ...[
-          _buildTextField(label: 'Ürün Milyemi', hint: '916, 750, 585 vb.', controller: _urunMilyemiController),
+          _buildMilyemDropdown(),
           const SizedBox(height: 12),
           _buildTextField(label: 'Toplam Gram', hint: '100.00', controller: _gramController),
           const SizedBox(height: 12),
@@ -383,7 +392,48 @@ class _IslemPageState extends ConsumerState<IslemPage> {
             ),
           ),
         ],
+        // İŞLEM TUTARI (TL) - TÜM İŞLEM TİPLERİ İÇİN
+        const SizedBox(height: 12),
+        _buildTextField(
+          label: 'İşlem Tutarı (TL) - İsteğe Bağlı',
+          hint: '1000.00',
+          controller: _islemTutariController,
+        ),
       ],
+    );
+  }
+
+  Widget _buildMilyemDropdown() {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Ürün Milyemi', style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            DropdownButtonFormField<int>(
+              initialValue: _selectedMilyem,
+              items: milyemAyarlari
+                  .map((item) => DropdownMenuItem(
+                        value: item['milyem'] as int,
+                        child: Text('${item['ad']} (${item['milyem']} Milyem)'),
+                      ))
+                  .toList(),
+              onChanged: (value) {
+                setState(() {
+                  _selectedMilyem = value ?? 916;
+                  _recalculateHasAltin();
+                });
+              },
+              decoration: InputDecoration(
+                border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 
@@ -519,7 +569,7 @@ class _IslemPageState extends ConsumerState<IslemPage> {
         musteriAdi: _selectedMusteriAdi!,
         islemTipi: _selectedIslemTipi,
         urunTipi: _selectedUrunTipi,
-        urunMilyemi: int.tryParse(_urunMilyemiController.text),
+        urunMilyemi: _selectedMilyem,
         iscilikMilyemi: double.tryParse(_iscilikMilyemiController.text),
         parcaIscilikGrami: double.tryParse(_parcaIscilikGramiController.text),
         gram: double.tryParse(_gramController.text),
@@ -533,6 +583,24 @@ class _IslemPageState extends ConsumerState<IslemPage> {
       );
 
       await service.islemKaydet(islem: islem);
+
+      // KASA OTOMASYONİ
+      final islemTutari = double.tryParse(_islemTutariController.text) ?? 0.0;
+      if (islemTutari > 0) {
+        if (_selectedIslemTipi == IslemTipi.alis) {
+          // Alış: Kasadan TL çıkışı (müşteriye nakit verilir)
+          ref.read(kasaProvider.notifier).paraCikisi(
+                dovizTipi: 'TL',
+                tutar: islemTutari,
+              );
+        } else if (_selectedIslemTipi == IslemTipi.satis) {
+          // Satış: Kasaya TL girişi (müşteriden nakit alınır)
+          ref.read(kasaProvider.notifier).paraGirisi(
+                dovizTipi: 'TL',
+                tutar: islemTutari,
+              );
+        }
+      }
 
       if (mounted) {
         _showSnackBar(
@@ -553,15 +621,16 @@ class _IslemPageState extends ConsumerState<IslemPage> {
   }
 
   void _resetForm() {
-    _urunMilyemiController.clear();
     _iscilikMilyemiController.clear();
     _parcaIscilikGramiController.clear();
     _gramController.clear();
     _adetController.clear();
     _nakitMiktariController.clear();
+    _islemTutariController.clear();
     setState(() {
       _hasAltinKarsiligi = 0.0;
       _selectedStokId = null;
+      _selectedMilyem = 916;
     });
   }
 

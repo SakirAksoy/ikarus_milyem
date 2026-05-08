@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 import 'theme.dart';
 import 'musteri_model.dart';
 import 'musteri_provider.dart';
 import 'stok_model.dart';
 import 'stok_provider.dart';
+import 'fis_model.dart';
+import 'fis_provider.dart';
 import 'fis_olustur_page.dart';
-import 'fis_gecmisi_page.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -39,6 +41,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
   Widget build(BuildContext context) {
     final musterilerAsync = ref.watch(musteriListProvider);
     final stoklarAsync = ref.watch(stoklarStreamProvider);
+    final fislerAsync = ref.watch(fisProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
@@ -53,6 +56,9 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
 
           // Quick Actions
           _buildQuickActions(),
+
+          // Recent Transactions
+          _buildRecentTransactions(fislerAsync),
         ],
       ),
     );
@@ -325,35 +331,199 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             ),
           ),
         ),
-        SizedBox(
-          width: double.infinity,
-          height: 56,
-          child: OutlinedButton.icon(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const FisGecmisiPage()),
-              );
-            },
-            icon: const Icon(Icons.history, size: 20),
-            label: Text(
-              'FİŞ GEÇMİŞİ',
+      ],
+    );
+  }
+
+  // =========================================================================
+  // RECENT TRANSACTIONS
+  // =========================================================================
+
+  Widget _buildRecentTransactions(AsyncValue<List<FisModel>> fislerAsync) {
+    return Column(
+      spacing: 12,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'SON İŞLEMLER',
               style: GoogleFonts.syne(
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AntiGravityColors.textMuted,
                 letterSpacing: 0.5,
               ),
             ),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: AntiGravityColors.goldAccent,
-              side: const BorderSide(
-                color: AntiGravityColors.goldAccent,
-                width: 1.5,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+        fislerAsync.when(
+          loading: () => Container(
+            decoration: BoxDecoration(
+              color: AntiGravityColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AntiGravityColors.border, width: 1),
+            ),
+            padding: const EdgeInsets.all(16),
+            height: 120,
+            child: const Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, _) => Container(
+            decoration: BoxDecoration(
+              color: AntiGravityColors.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AntiGravityColors.border, width: 1),
+            ),
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              'İşlemler yüklenemedi',
+              style: GoogleFonts.syne(
+                fontSize: 13,
+                color: AntiGravityColors.textMuted,
               ),
             ),
           ),
+          data: (fisler) {
+            if (fisler.isEmpty) {
+              return Container(
+                decoration: BoxDecoration(
+                  color: AntiGravityColors.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AntiGravityColors.border, width: 1),
+                ),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  spacing: 12,
+                  children: [
+                    Icon(
+                      Icons.inbox,
+                      size: 40,
+                      color: AntiGravityColors.textMuted.withValues(alpha: 0.5),
+                    ),
+                    Text(
+                      'Henüz işlem yok',
+                      style: GoogleFonts.syne(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: AntiGravityColors.textMuted,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }
+
+            final recentFisler = fisler.take(5).toList();
+
+            return Container(
+              decoration: BoxDecoration(
+                color: AntiGravityColors.surface,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AntiGravityColors.border, width: 1),
+              ),
+              child: ListView.separated(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: recentFisler.length,
+                separatorBuilder: (context, index) => Divider(
+                  color: AntiGravityColors.border,
+                  height: 1,
+                  indent: 16,
+                  endIndent: 16,
+                ),
+                itemBuilder: (context, index) {
+                  final fis = recentFisler[index];
+                  final islemTipiIcon = fis.islemTipi == IslemTipiFis.satis
+                      ? Icons.arrow_upward
+                      : fis.islemTipi == IslemTipiFis.alis
+                          ? Icons.arrow_downward
+                          : Icons.receipt;
+                  final islemTipiColor = fis.islemTipi == IslemTipiFis.satis
+                      ? AntiGravityColors.liveGreen
+                      : fis.islemTipi == IslemTipiFis.alis
+                          ? const Color(0xFFFF6B6B)
+                          : AntiGravityColors.goldAccent;
+                  final tarihStr = DateFormat('dd.MM.yyyy HH:mm').format(fis.tarih);
+
+                  return Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            spacing: 12,
+                            children: [
+                              Container(
+                                width: 36,
+                                height: 36,
+                                decoration: BoxDecoration(
+                                  color: islemTipiColor.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Icon(
+                                  islemTipiIcon,
+                                  color: islemTipiColor,
+                                  size: 18,
+                                ),
+                              ),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  spacing: 4,
+                                  children: [
+                                    Text(
+                                      fis.musteriAd,
+                                      style: GoogleFonts.syne(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AntiGravityColors.textLight,
+                                      ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      tarihStr,
+                                      style: GoogleFonts.syne(
+                                        fontSize: 11,
+                                        color: AntiGravityColors.textMuted,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          spacing: 4,
+                          children: [
+                            Text(
+                              '${fis.hasGram.toStringAsFixed(2)} gr',
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AntiGravityColors.textLight,
+                              ),
+                            ),
+                            Text(
+                              '₺${fis.tlTutar.toStringAsFixed(2)}',
+                              style: GoogleFonts.jetBrainsMono(
+                                fontSize: 11,
+                                color: AntiGravityColors.textMuted,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            );
+          },
         ),
       ],
     );

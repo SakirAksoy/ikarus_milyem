@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'musteri_provider.dart';
 import 'musteri_ekle_dialog.dart';
+import 'musteri_detay_page.dart';
 import 'theme.dart';
 
 class MusteriListePage extends ConsumerStatefulWidget {
@@ -78,6 +79,14 @@ class _MusteriListePageState extends ConsumerState<MusteriListePage> {
               return Card(
                 margin: const EdgeInsets.symmetric(vertical: 6.0),
                 child: ListTile(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MusteriDetayPage(musteri: musteri),
+                      ),
+                    );
+                  },
                   leading: CircleAvatar(
                     backgroundColor: bakiyeRengi,
                     child: Text(
